@@ -245,7 +245,7 @@ struct GeneralTabView: View {
 
     private func addToDock() {
         addDockLoading = true
-        DockHelper.addToDock(Bundle.main.bundleURL)
+        DockHelper.addSelfToDock()
         DispatchQueue.main.asyncAfter(deadline: .now() + 1.0) {
             hasDockIcon = DockHelper.isInDock(Bundle.main.bundleURL)
             addDockLoading = false

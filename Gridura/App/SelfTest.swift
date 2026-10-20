@@ -71,6 +71,10 @@ enum SelfTest {
             runGuideShot()
             return
         }
+        if name == "dock" {
+            runDock()
+            return
+        }
         if name == "guide-anim" {
             runGuideAnimation()
             return
@@ -1093,6 +1097,40 @@ enum SelfTest {
                 after(2.0) { log("DONE"); NSApp.terminate(nil) }
             }
         }
+    }
+
+
+    /// Add to Dock against a scratch preferences domain: the user's real Dock is never touched.
+    static func runDock() {
+        let realBefore = (CFPreferencesCopyAppValue("persistent-apps" as CFString, "com.apple.dock" as CFString) as? [Any])?.count ?? -1
+        let scratch = "app.gridura.selftest.dock"
+        DockHelper.dockDomain = scratch
+        DockHelper.restartsDock = false
+        defer {
+            CFPreferencesSetAppValue("persistent-apps" as CFString, nil, scratch as CFString)
+            CFPreferencesAppSynchronize(scratch as CFString)
+        }
+        let calculator = URL(fileURLWithPath: "/System/Applications/Calculator.app")
+        log("before: inDock=\(DockHelper.isInDock(calculator))")
+        let ok = DockHelper.addToDock(calculator)
+        let apps = CFPreferencesCopyAppValue("persistent-apps" as CFString, scratch as CFString) as? [[String: Any]] ?? []
+        log("add: ok=\(ok) inDock=\(DockHelper.isInDock(calculator)) entries=\(apps.count)")
+        if !ok || !DockHelper.isInDock(calculator) || apps.count != 1 { log("FAIL: the app was not added") }
+        DockHelper.addToDock(calculator)
+        let again = (CFPreferencesCopyAppValue("persistent-apps" as CFString, scratch as CFString) as? [Any])?.count ?? 0
+        log("add again: entries=\(again)")
+        if again != 1 { log("FAIL: adding twice created a duplicate") }
+        if let tile = apps.first, let data = tile["tile-data"] as? [String: Any], let file = data["file-data"] as? [String: Any] {
+            log("tile: label=\(data["file-label"] ?? "?") type=\(data["file-type"] ?? "?") url=\(file["_CFURLString"] ?? "?") bundle=\(data["bundle-identifier"] ?? "?") tile-type=\(tile["tile-type"] ?? "?")")
+            if (file["_CFURLString"] as? String) != "file:///System/Applications/Calculator.app/" || (tile["tile-type"] as? String) != "file-tile" {
+                log("FAIL: the tile is not shaped like the Dock's own entries")
+            }
+        } else { log("FAIL: no tile written") }
+        let realAfter = (CFPreferencesCopyAppValue("persistent-apps" as CFString, "com.apple.dock" as CFString) as? [Any])?.count ?? -1
+        log("real Dock entries before/after: \(realBefore)/\(realAfter)")
+        if realBefore != realAfter { log("FAIL: the real Dock was modified") }
+        log("DONE")
+        NSApp.terminate(nil)
     }
 
     /// Real HID mouse in the genuine launcher: a horizontal drag on empty space must change the page,
