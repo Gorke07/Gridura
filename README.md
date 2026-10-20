@@ -24,6 +24,25 @@ open it with a hotkey, a pinch, a hot corner or the menu bar, find an app, launc
 > **Status: early preview (0.0.1).** The core is working and covered by automated UI tests, but it has had little
 > real-world use yet. Expect rough edges and please report them as [issues](https://github.com/Gorke07/Gridura/issues).
 
+## Screenshots
+
+<p align="center">
+  <img src="docs/assets/grid.jpg" width="860" alt="The paged app grid over a wallpaper">
+</p>
+
+<table>
+  <tr>
+    <td align="center"><img src="docs/assets/folder.jpg" alt="An open folder"><br><sub>Folders</sub></td>
+    <td align="center"><img src="docs/assets/window.png" alt="Window mode"><br><sub>Window mode</sub></td>
+  </tr>
+  <tr>
+    <td align="center"><img src="docs/assets/search.jpg" alt="Search results"><br><sub>Search</sub></td>
+    <td align="center"><img src="docs/assets/settings-general.png" alt="General settings" width="300"> <img src="docs/assets/settings-interface.png" alt="Interface settings" width="300"><br><sub>Settings</sub></td>
+  </tr>
+</table>
+
+<sub>The screenshots use a stand-in background; with Screen Recording permission Gridura shows your own wallpaper, blurred.</sub>
+
 ## Features
 
 ### The grid

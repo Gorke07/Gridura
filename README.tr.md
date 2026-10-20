@@ -24,6 +24,25 @@ getirir: bir kısayol, kıstırma hareketi, sıcak köşe veya menü çubuğuyla
 > **Durum: erken ön sürüm (0.0.1).** Çekirdek çalışıyor ve otomatik arayüz testleriyle kapsanıyor, ancak gerçek
 > kullanımda henüz az denendi. Pürüzler olabilir; lütfen [issue](https://github.com/Gorke07/Gridura/issues) olarak bildirin.
 
+## Ekran görüntüleri
+
+<p align="center">
+  <img src="docs/assets/grid.jpg" width="860" alt="Duvar kağıdı üzerinde sayfalı uygulama ızgarası">
+</p>
+
+<table>
+  <tr>
+    <td align="center"><img src="docs/assets/folder.jpg" alt="Açık bir klasör"><br><sub>Klasörler</sub></td>
+    <td align="center"><img src="docs/assets/window.png" alt="Pencere modu"><br><sub>Pencere modu</sub></td>
+  </tr>
+  <tr>
+    <td align="center"><img src="docs/assets/search.jpg" alt="Arama sonuçları"><br><sub>Arama</sub></td>
+    <td align="center"><img src="docs/assets/settings-general.png" alt="Genel ayarlar" width="300"> <img src="docs/assets/settings-interface.png" alt="Arayüz ayarları" width="300"><br><sub>Ayarlar</sub></td>
+  </tr>
+</table>
+
+<sub>Ekran görüntülerinde yer tutucu bir arka plan kullanıldı; Ekran Kaydı izniyle Gridura kendi duvar kağıdınızı bulanık olarak gösterir.</sub>
+
 ## Özellikler
 
 ### Izgara

@@ -146,10 +146,10 @@ func drawDots(_ cg: CGContext, bright: Bool) {
     }
 }
 
-func drawLetterB(_ cg: CGContext, fillColors: [NSColor]) {
+func drawLetterG(_ cg: CGContext, fillColors: [NSColor]) {
     var font = NSFont.systemFont(ofSize: 640, weight: .heavy)
     if let rounded = font.fontDescriptor.withDesign(.rounded), let f = NSFont(descriptor: rounded, size: 640) { font = f }
-    let attributed = NSAttributedString(string: "B", attributes: [.font: font])
+    let attributed = NSAttributedString(string: "G", attributes: [.font: font])
     let line = CTLineCreateWithAttributedString(attributed)
     let bounds = CTLineGetBoundsWithOptions(line, .useGlyphPathBounds)
     cg.saveGState()
@@ -231,7 +231,7 @@ let variants: [Variant] = [
     Variant(name: "Brand") { cg, dark in
         iconBody(cg, top: dark ? color(0x16394A) : color(0x2FE0CF), bottom: dark ? color(0x061219) : color(0x0A5FE0),
                  edge: NSColor.white.withAlpha(dark ? 0.10 : 0.22)) {
-            drawLetterB(cg, fillColors: dark ? [color(0xCFFCF6), color(0x39D0C0)] : [.white, color(0xDDF4FF)])
+            drawLetterG(cg, fillColors: dark ? [color(0xCFFCF6), color(0x39D0C0)] : [.white, color(0xDDF4FF)])
         }
     },
     Variant(name: "Classic") { cg, dark in

@@ -127,7 +127,7 @@ enum SelfTest {
             }
             return
         }
-        if name == "realdrag-app" || name == "realclick" || name == "realsearch" || name == "realsearch2" || name == "realrename" {
+        if name == "realdrag-app" || name == "realclick" || name == "realsearch" || name == "realsearch2" || name == "realrename" || name == "readme-shots" {
             // The genuine launcher window (panel, view controller, its mouse monitors) with real events.
             // Fill the scratch store first (as the other tests do), then bring up the real launcher.
             ApplicationManager.shared.scan(fromBackup: false) {
@@ -140,7 +140,7 @@ enum SelfTest {
                         guard let win = controller.window else { log("no launcher window"); NSApp.terminate(nil); return }
                         win.level = NSWindow.Level(rawValue: 2000)          // keep every click inside our window
                         log("launcher visible=\(win.isVisible) level=\(win.level.rawValue) frame=\(win.frame)")
-                        if name == "realrename" { runRealRename(controller, win) } else if name == "realsearch2" { runRealSearch2(controller, win) } else if name == "realsearch" { runRealSearch(controller, win) } else if name == "realclick" { runRealClick(controller, win) } else { runRealDrag(controller.launchpadVC.contentView, win) }
+                        if name == "readme-shots" { runReadmeShots(controller, win) } else if name == "realrename" { runRealRename(controller, win) } else if name == "realsearch2" { runRealSearch2(controller, win) } else if name == "realsearch" { runRealSearch(controller, win) } else if name == "realclick" { runRealClick(controller, win) } else { runRealDrag(controller.launchpadVC.contentView, win) }
                     }
                 }
             }
@@ -985,6 +985,78 @@ enum SelfTest {
             }
         }
         after(40) { log("FAIL: timeout"); NSApp.terminate(nil) }
+    }
+
+
+    /// Captures the README gallery to `/tmp/gridura_readme_<name>.png`: the real launcher over a stand-in wallpaper
+    /// (the window capture cannot see behind-window material, and no desktop picture is available to the test).
+    static func runReadmeShots(_ controller: LaunchpadWindowController, _ win: NSWindow) {
+        let content = controller.launchpadVC.contentView
+        let state = AppState.shared
+        if let host = content.superview {
+            let image = NSImage(size: host.bounds.size, flipped: false) { rect in
+                NSGradient(colors: [NSColor(red: 0.10, green: 0.07, blue: 0.30, alpha: 1),
+                                    NSColor(red: 0.30, green: 0.18, blue: 0.62, alpha: 1),
+                                    NSColor(red: 0.85, green: 0.35, blue: 0.55, alpha: 1),
+                                    NSColor(red: 0.98, green: 0.62, blue: 0.40, alpha: 1)])?
+                    .draw(in: rect, angle: 35)
+                return true
+            }
+            let imageView = NSImageView(frame: host.bounds)
+            imageView.image = image
+            imageView.imageScaling = .scaleAxesIndependently
+            imageView.autoresizingMask = [.width, .height]
+            host.addSubview(imageView, positioned: .below, relativeTo: content)
+        }
+        func shot(_ name: String) {
+            if let image = PrivateAPI.captureWindow(CGWindowID(win.windowNumber)) {
+                try? NSBitmapImageRep(cgImage: image).representation(using: .png, properties: [:])?
+                    .write(to: URL(fileURLWithPath: "/tmp/gridura_readme_\(name).png"))
+            }
+        }
+        after(1.5) {
+            shot("grid")
+            // A query whose hits are all Apple apps, so the gallery shows no personal software.
+            let apple = Set(LaunchpadDataManager.shared.allApps().filter { $0.bundleId.hasPrefix("com.apple.") }.map(\.id))
+            let pool = LaunchpadDataManager.shared.allApps()
+            let letters = Array("abcdefghijklmnopqrstuvwxyz")
+            var best = (query: "cal", hits: 0)
+            for a in letters { for b in letters {
+                let q = String([a, b])
+                let hits = pool.filter { LaunchpadDataManager.score($0, query: q) != nil }      // the same matching the search uses
+                if hits.count > best.hits, hits.allSatisfy({ apple.contains($0.id) }) { best = (q, hits.count) }
+            } }
+            let query = best.query
+            log("search query: \(query)")
+            content.searchView.inputField.stringValue = query
+            content.searchView.onDebouncedQueryChanged?(query, "")
+            after(1.0) {
+                shot("search")
+                content.searchView.clear(notify: true)
+                after(0.8) {
+                    if let folder = content.displayedGroups.first(where: { $0.isFolder && $0.apps.count >= 6 }),
+                       let cell = content.groupViews[folder.id] {
+                        content.openFolder(groupView: cell, source: 0)
+                        after(1.4) {
+                            shot("folder")
+                            content.closeFolder(animated: true)
+                            after(1.0) {
+                                let original = state.displayMode
+                                state.displayMode = .window
+                                NotificationChannel.center.post(name: NotificationChannel.Name.preferencesChanged, object: PreferenceModule.layout.rawValue)
+                                after(2.0) {
+                                    shot("window")
+                                    state.displayMode = original
+                                    NotificationChannel.center.post(name: NotificationChannel.Name.preferencesChanged, object: PreferenceModule.layout.rawValue)
+                                    after(1.0) { log("DONE"); NSApp.terminate(nil) }
+                                }
+                            }
+                        }
+                    } else { log("no folder with 6+ apps"); NSApp.terminate(nil) }
+                }
+            }
+        }
+        _ = state
     }
 
     /// Real HID mouse in the genuine launcher: a horizontal drag on empty space must change the page,
