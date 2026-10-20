@@ -2,5 +2,26 @@
 <rss xmlns:sparkle="http://www.andymatuschak.org/xml-namespaces/sparkle" version="2.0">
     <channel>
         <title>Gridura</title>
+        <item>
+            <title>0.0.1</title>
+            <pubDate>Tue, 20 Oct 2026 07:17:45 +0300</pubDate>
+            <link>https://github.com/Gorke07/Gridura/releases</link>
+            <sparkle:version>1</sparkle:version>
+            <sparkle:shortVersionString>0.0.1</sparkle:shortVersionString>
+            <sparkle:minimumSystemVersion>26.0</sparkle:minimumSystemVersion>
+            <description xml:lang="en" sparkle:format="markdown"><![CDATA[### Added
+- First preview: a full-screen, paged or scrolling app grid with folders, drag-and-drop reordering, multi-select, search, hide, uninstall with leftovers, layout reorganisation, backup and restore.
+- Triggers: global hotkey, F4, trackpad pinch, hot corners, menu-bar icon.
+- Updates through Sparkle.
+
+]]></description>
+            <description xml:lang="tr" sparkle:format="markdown"><![CDATA[### Eklendi
+- İlk ön sürüm: tam ekran, sayfalı veya kaydırmalı uygulama ızgarası; klasörler, sürükle-bırak ile sıralama, çoklu seçim, arama, gizleme, artıklarıyla birlikte silme, düzeni yeniden organize etme, yedekleme ve geri yükleme.
+- Tetikleyiciler: genel kısayol, F4, trackpad ile kıstırma, sıcak köşeler, menü çubuğu simgesi.
+- Sparkle ile güncelleme.
+
+]]></description>
+            <enclosure url="https://github.com/Gorke07/Gridura/releases/download/v0.0.1/Gridura-0.0.1.dmg" length="7245438" type="application/octet-stream" sparkle:edSignature="6KA82S/sHpZYm15THKdTdTWBksNQ4DyDIpyyS6A1QHOpdEMxda2ux3zZHfUMjZDCjPlFYVI0yOxtnXVDHhVpCA=="/>
+        </item>
     </channel>
 </rss>
