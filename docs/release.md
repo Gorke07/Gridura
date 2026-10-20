@@ -40,7 +40,7 @@ Output: `build/Gridura-<version>.dmg` (signed, notarized, stapled) and an update
 `SIGN_IDENTITY` the script builds an ad-hoc signed local copy that Gatekeeper rejects on other Macs.
 
 4. Publish in this order, so the feed never points at a missing file:
-   1. `gh release create v<version> build/Gridura-<version>.dmg --title "Gridura <version>" --notes-file build/release-notes-tr.md`
+   1. `gh release create v<version> build/Gridura-<version>.dmg --title "Gridura <version>" --notes-file build/release-notes-en.md`
    2. commit and push `appcast.xml` to `main`.
 
 `build/` is wiped on every run: copy the `.dmg` elsewhere to keep older releases. To withdraw a release, delete its

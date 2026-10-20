@@ -71,6 +71,10 @@ enum SelfTest {
             runGuideShot()
             return
         }
+        if name == "guide-anim" {
+            runGuideAnimation()
+            return
+        }
         if name == "shot-prefs" {
             runPrefsShot()
             return
@@ -1057,6 +1061,38 @@ enum SelfTest {
             }
         }
         _ = state
+    }
+
+
+    /// Presses Continue with a real click and captures the page transition at fixed delays
+    /// (`/tmp/gridura_guideanim_<n>.png`).
+    static func runGuideAnimation() {
+        NSApp.setActivationPolicy(.regular)
+        GuideWindowController.shared.show()
+        after(1.5) {
+            guard let win = GuideWindowController.shared.window else { NSApp.terminate(nil); return }
+            let mainHeight = NSScreen.screens[0].frame.height
+            let f = win.frame
+            let point = CGPoint(x: f.maxX - 50 - 24 - 62, y: mainHeight - (f.minY + 50 + 24 + 20))
+            func post(_ type: CGEventType) {
+                CGEvent(mouseEventSource: nil, mouseType: type, mouseCursorPosition: point, mouseButton: .left)?.post(tap: .cghidEventTap)
+            }
+            post(.mouseMoved)
+            after(0.2) {
+                post(.leftMouseDown); post(.leftMouseUp)
+                let start = CACurrentMediaTime()
+                for (i, t) in [0.05, 0.12, 0.2, 0.3, 0.45, 0.7, 1.1].enumerated() {
+                    after(t) {
+                        if let image = PrivateAPI.captureWindow(CGWindowID(win.windowNumber)) {
+                            try? NSBitmapImageRep(cgImage: image).representation(using: .png, properties: [:])?
+                                .write(to: URL(fileURLWithPath: "/tmp/gridura_guideanim_\(i).png"))
+                        }
+                        log(String(format: "frame %d at %.2fs", i, CACurrentMediaTime() - start))
+                    }
+                }
+                after(2.0) { log("DONE"); NSApp.terminate(nil) }
+            }
+        }
     }
 
     /// Real HID mouse in the genuine launcher: a horizontal drag on empty space must change the page,

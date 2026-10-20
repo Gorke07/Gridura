@@ -135,9 +135,11 @@ except Exception: print("")' "$1" <<<"$RESULT"; }
   # items are kept as they are. The Turkish notes are then added beside them.
   FEED="$BUILD/appcast"
   NOTES_TR="$BUILD/release-notes-tr.md"
+  NOTES_EN="$BUILD/release-notes-en.md"
   mkdir -p "$FEED"
   cp "$DMG" "$FEED/"
   release_notes "$CHANGELOG_EN" >"$FEED/$(basename "$DMG" .dmg).md"
+  cp "$FEED/$(basename "$DMG" .dmg).md" "$NOTES_EN"
   release_notes "$CHANGELOG_TR" >"$NOTES_TR"
   if [[ -f "$APPCAST" ]]; then cp "$APPCAST" "$FEED/appcast.xml"; fi
   "$SPARKLE_BIN/generate_appcast" --account "$SPARKLE_ACCOUNT" \
@@ -150,7 +152,7 @@ except Exception: print("")' "$1" <<<"$RESULT"; }
   python3 Scripts/localize-appcast.py "$FEED/appcast.xml" "$ITEM_URL" en "tr=$NOTES_TR"
   cp "$FEED/appcast.xml" "$APPCAST"
   echo "Updated $APPCAST with build $BUILD_NUMBER. Publish the release first, so the feed never points at a missing file:"
-  echo "  gh release create v$VERSION \"$DMG\" --title \"Gridura $VERSION\" --notes-file \"$NOTES_TR\""
+  echo "  gh release create v$VERSION \"$DMG\" --title \"Gridura $VERSION\" --notes-file \"$NOTES_EN\""
   echo "  git add $APPCAST && git commit -m \"chore: appcast for $VERSION\" && git push"
 else
   echo "Signed but not notarized (set NOTARY_PROFILE to notarize)."

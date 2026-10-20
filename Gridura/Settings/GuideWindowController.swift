@@ -74,8 +74,7 @@ struct GuideView: View {
                 }
             }
             .opacity(colorScheme == .dark ? 0.4 : 0.6)
-            .clipShape(RoundedRectangle(cornerRadius: 18, style: .continuous))
-            .padding(8)
+            .clipShape(RoundedRectangle(cornerRadius: 26, style: .continuous))
 
             VStack(alignment: .leading) {
                 pagesStrip
@@ -98,7 +97,6 @@ struct GuideView: View {
                 )
         }
         .shadow(color: .black.opacity(0.32), radius: 24, x: 0, y: 10)
-        .shadow(color: .black.opacity(0.16), radius: 0)
         .padding(50)
         .onAppear {
             startOnLogin = LaunchAtLogin.isEnabled
@@ -114,16 +112,18 @@ struct GuideView: View {
 
     private var pagesStrip: some View {
         HStack(alignment: .top, spacing: 0) {
-            welcomePage.frame(width: 440)
-            workflowPage.frame(width: 440)
-            displayModePage.frame(width: 440)
-            finishPage.frame(width: 440)
+            welcomePage.frame(width: 440).opacity(index == 0 ? 1 : 0)
+            workflowPage.frame(width: 440).opacity(index == 1 ? 1 : 0)
+            displayModePage.frame(width: 440).opacity(index == 2 ? 1 : 0)
+            finishPage.frame(width: 440).opacity(index == 3 ? 1 : 0)
         }
         .frame(width: 440, height: 520, alignment: .leading)
         .offset(x: -440 * CGFloat(index))
-        .animation(.spring(response: 0.8, dampingFraction: 1, blendDuration: 0), value: index)
+        .animation(.spring(response: 0.5, dampingFraction: 0.92, blendDuration: 0), value: index)
         .frame(width: 440, alignment: .leading)
-        .clipped()
+        // Pages slide inside the card: clipped to its rounded top, so nothing leaks over the border.
+        .clipShape(UnevenRoundedRectangle(topLeadingRadius: 26, bottomLeadingRadius: 0, bottomTrailingRadius: 0,
+                                          topTrailingRadius: 26, style: .continuous))
     }
 
     // MARK: - Page 0
@@ -443,7 +443,7 @@ struct GuideView: View {
             .disabled(loading)
         }
         .padding(24)
-        .animation(.spring(response: 0.8, dampingFraction: 1, blendDuration: 0), value: index)
+        .animation(.spring(response: 0.5, dampingFraction: 0.92, blendDuration: 0), value: index)
     }
 
     // MARK: - Actions
