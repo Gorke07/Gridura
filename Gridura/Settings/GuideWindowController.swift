@@ -7,19 +7,16 @@ final class GuideWindowController: NSWindowController, NSWindowDelegate {
     static let shared = GuideWindowController()
 
     private convenience init() {
-        let window = NSWindow(contentRect: NSRect(x: 0, y: 0, width: 540, height: 680),
-                              styleMask: [.titled, .closable],
-                              backing: .buffered,
-                              defer: false)
-        window.titleVisibility = .hidden
-        window.titlebarAppearsTransparent = true
+        // Borderless on purpose: a titled window gets the system's own frame and shadow on macOS 26, which
+        // showed up as a second outline around the card.
+        let window = GuideWindow(contentRect: NSRect(x: 0, y: 0, width: 540, height: 680),
+                                 styleMask: [.borderless],
+                                 backing: .buffered,
+                                 defer: false)
         window.backgroundColor = .clear
         window.isOpaque = false
         window.hasShadow = false
         window.isMovableByWindowBackground = true
-        window.standardWindowButton(.closeButton)?.isHidden = true
-        window.standardWindowButton(.miniaturizeButton)?.isHidden = true
-        window.standardWindowButton(.zoomButton)?.isHidden = true
         window.contentView = NSHostingView(rootView: GuideView())
         window.center()
         window.isReleasedWhenClosed = false
@@ -39,6 +36,12 @@ final class GuideWindowController: NSWindowController, NSWindowDelegate {
     override func close() {
         window?.close()
     }
+}
+
+/// A borderless window can only take key status if it says so; the guide's buttons and the close dot need it.
+private final class GuideWindow: NSWindow {
+    override var canBecomeKey: Bool { true }
+    override var canBecomeMain: Bool { true }
 }
 
 /// The onboarding guide's four pages.
