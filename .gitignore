@@ -1,0 +1,6 @@
+build/
+.DS_Store
+*.xcuserstate
+xcuserdata/
+# generated from project.yml by `xcodegen generate`
+Gridura.xcodeproj/
