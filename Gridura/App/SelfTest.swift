@@ -71,6 +71,16 @@ enum SelfTest {
             runGuideShot()
             return
         }
+        if name == "guide-finish" {
+            runGuideFinish()
+            return
+        }
+        if name == "guide-finish-app" {
+            // With the genuine launcher window controller alive (it observes the store), as in the real first run.
+            _ = LaunchpadWindowController.shared.launchpadVC.contentView
+            runGuideFinish()
+            return
+        }
         if name == "dock" {
             runDock()
             return
@@ -1094,7 +1104,22 @@ enum SelfTest {
                         log(String(format: "frame %d at %.2fs", i, CACurrentMediaTime() - start))
                     }
                 }
-                after(2.0) { log("DONE"); NSApp.terminate(nil) }
+                after(1.5) {
+                    // Walk through the remaining pages with real clicks and press Done.
+                    func click(_ n: Int) {
+                        if n == 0 {
+                            after(4.0) {
+                                log("after Done: guide visible=\(win.isVisible) launcher visible=\(LaunchpadWindowController.shared.window?.isVisible ?? false)")
+                                if win.isVisible { log("FAIL: the guide did not close after Done") }
+                                log("DONE"); NSApp.terminate(nil)
+                            }
+                            return
+                        }
+                        post(.leftMouseDown); post(.leftMouseUp)
+                        after(1.0) { click(n - 1) }
+                    }
+                    click(3)          // pages 2, 3, 4, then Done
+                }
             }
         }
     }
@@ -1131,6 +1156,30 @@ enum SelfTest {
         if realBefore != realAfter { log("FAIL: the real Dock was modified") }
         log("DONE")
         NSApp.terminate(nil)
+    }
+
+
+    /// The guide's "Done" sequence (optional system Launchpad import, scan, load) against a scratch store, with timings.
+    static func runGuideFinish() {
+        let started = CACurrentMediaTime()
+        func stamp(_ what: String) { log(String(format: "%@ at %.2fs", what, CACurrentMediaTime() - started)) }
+        after(60) { log("FAIL: the Done sequence did not finish in 60 s"); NSApp.terminate(nil) }
+        let importData = ProcessInfo.processInfo.environment["GRIDURA_NO_IMPORT"] == nil
+        func afterImport() {
+            stamp("import step done")
+            ApplicationManager.shared.scan(fromBackup: false) {
+                stamp("scan done")
+                LaunchpadDataManager.shared.load {
+                    stamp("load done")
+                    log("DONE"); NSApp.terminate(nil)
+                }
+            }
+        }
+        if importData {
+            do { let r = try NativeDataManager.shared.importLayout(); log("import result: \(r)") }
+            catch { log("import threw: \(error.localizedDescription)") }
+        }
+        afterImport()
     }
 
     /// Real HID mouse in the genuine launcher: a horizontal drag on empty space must change the page,

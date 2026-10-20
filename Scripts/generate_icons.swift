@@ -274,7 +274,7 @@ func imagesetContents(light: String, dark: String, template: Bool = false) -> [S
         ],
         "info": ["author": "xcode", "version": 1],
     ]
-    if template { result["properties"] = ["template-render-intent": "template"] }
+    if template { result["properties"] = ["template-rendering-intent": "template"] }
     return result
 }
 

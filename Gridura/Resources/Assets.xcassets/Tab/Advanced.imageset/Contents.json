@@ -22,6 +22,6 @@
     "version" : 1
   },
   "properties" : {
-    "template-render-intent" : "template"
+    "template-rendering-intent" : "template"
   }
 }

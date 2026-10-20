@@ -77,6 +77,7 @@ struct GuideView: View {
                 }
             }
             .opacity(colorScheme == .dark ? 0.4 : 0.6)
+            .frame(width: 440, height: 580)
             .clipShape(RoundedRectangle(cornerRadius: 26, style: .continuous))
 
             VStack(alignment: .leading) {
@@ -84,6 +85,7 @@ struct GuideView: View {
                 Spacer(minLength: 0)
                 bottomBar
             }
+            .frame(width: 440, height: 580, alignment: .top)
 
             TitleBar(title: "", showMini: false, onClose: { GuideWindowController.shared.close() })
                 .padding(.top, 10)
@@ -120,7 +122,7 @@ struct GuideView: View {
             displayModePage.frame(width: 440).opacity(index == 2 ? 1 : 0)
             finishPage.frame(width: 440).opacity(index == 3 ? 1 : 0)
         }
-        .frame(width: 440, height: 520, alignment: .leading)
+        .frame(width: 440, height: 492, alignment: .leading)
         .offset(x: -440 * CGFloat(index))
         .animation(.spring(response: 0.5, dampingFraction: 0.92, blendDuration: 0), value: index)
         .frame(width: 440, alignment: .leading)
@@ -463,29 +465,40 @@ struct GuideView: View {
         LaunchAtLogin.setEnabled(startOnLogin)
         appState.isFirstLaunch = false
         loading = true
+        LogManager.shared.info("Guide: finishing (import system data: \(importData))")
 
-        let afterImport = { [self] in
+        var completed = false
+        let complete = {
+            guard !completed else { return }
+            completed = true
+            loading = false
+            GuideWindowController.shared.close()
+            DispatchQueue.main.asyncAfter(deadline: .now() + 0.5) {
+                LaunchpadWindowController.shared.show()
+            }
+        }
+        // A step that never reports back must not leave the guide on screen with a spinner.
+        DispatchQueue.main.asyncAfter(deadline: .now() + 10) {
+            if !completed { LogManager.shared.error("Guide: finishing took more than 10 s; closing anyway") }
+            complete()
+        }
+
+        let afterImport = {
+            LogManager.shared.info("Guide: scanning applications")
             ApplicationManager.shared.scan(fromBackup: false) {
                 LaunchpadDataManager.shared.load {
-                    loading = false
-                    GuideWindowController.shared.close()
-                    DispatchQueue.main.asyncAfter(deadline: .now() + 0.5) {
-                        LaunchpadWindowController.shared.show()
-                    }
+                    LogManager.shared.info("Guide: finished")
+                    complete()
                 }
             }
         }
 
-        if importData {
-            do {
-                _ = try NativeDataManager.shared.importLayout()
-                afterImport()
-            } catch {
-                LogManager.shared.error("[ERROR] \(error.localizedDescription)")
-                afterImport()
-            }
-        } else {
-            afterImport()
+        guard importData else { afterImport(); return }
+        LogManager.shared.info("Guide: importing the system Launchpad layout")
+        DispatchQueue.global(qos: .userInitiated).async {
+            do { _ = try NativeDataManager.shared.importLayout() }
+            catch { LogManager.shared.error("[ERROR] \(error.localizedDescription)") }
+            DispatchQueue.main.async { afterImport() }
         }
     }
 

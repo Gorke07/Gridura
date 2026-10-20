@@ -105,7 +105,11 @@ extension UpdateManager: SPUUpdaterDelegate {
     }
 
     func updater(_ updater: SPUUpdater, didFinishUpdateCycleFor updateCheck: SPUUpdateCheck, error: Error?) {
-        if let error { LogManager.shared.error("Update check failed: \(error.localizedDescription)") }
+        guard let error else { return }
+        let nsError = error as NSError
+        // "You're up to date" arrives as an error; it is not a failure.
+        if nsError.domain == SUSparkleErrorDomain, nsError.code == Int(SUError.noUpdateError.rawValue) { return }
+        LogManager.shared.error("Update check failed: \(error.localizedDescription)")
     }
 
     func updater(_ updater: SPUUpdater, didDownloadUpdate item: SUAppcastItem) {

@@ -13,7 +13,10 @@ final class MenuBarManager: NSObject {
             guard statusItem == nil else { return }
             let item = NSStatusBar.system.statusItem(withLength: NSStatusItem.squareLength)
             if let button = item.button {
-                button.image = NSImage(named: "MenuBarIcon")
+                // A template image is tinted by the system like every other menu-bar icon (white on a dark bar).
+                let icon = NSImage(named: "MenuBarIcon")
+                icon?.isTemplate = true
+                button.image = icon
                 button.imageScaling = .scaleProportionallyUpOrDown
                 button.imagePosition = .imageOnly
                 button.target = self
